@@ -4,7 +4,7 @@
 
 :root {
     /* PALETA DE CORES (Cinza e Azul) */
-    --color-primary: #1F2937;  /* Cinza Chumbo/Grafite */
+    --color-primary: #565d64;  /* Cinza Chumbo/Grafite */
     --color-accent: #2563EB;   /* Azul Royal Vibrante */
     --color-bg-light: #F3F4F6; /* Cinza muito claro */
     --color-bg-dark: #111827;  /* Quase preto */
@@ -434,4 +434,3 @@ footer .container {
         justify-content: center;
     }
 }
-
