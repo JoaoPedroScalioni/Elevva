@@ -1,65 +1,98 @@
-// O código JavaScript (script.js) permanece o mesmo da versão anterior, 
-// pois ele é funcional e trata da interatividade (scroll suave e menu ativo).
-
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Seleciona todos os links de navegação para as seções (href começando com #)
-    const navLinks = document.querySelectorAll('.main-nav ul li a');
-    
-    // Seleciona todas as seções que têm um ID para serem observadas
-    const sections = document.querySelectorAll('section[id]');
-    
     // ------------------------------------
-    // 1. SCROLL SUAVE
+    // 1. MENU MOBILE (Hambúrguer)
     // ------------------------------------
+    const mobileMenuBtn = document.getElementById('mobile-menu');
+    const navLinksContainer = document.getElementById('nav-links');
+    const navLinks = document.querySelectorAll('.nav-links li a');
+
+    // Abrir/Fechar menu
+    mobileMenuBtn.addEventListener('click', () => {
+        navLinksContainer.classList.toggle('active');
+        
+        // Alternar ícone (hambúrguer <-> X)
+        const icon = mobileMenuBtn.querySelector('i');
+        if (navLinksContainer.classList.contains('active')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+        } else {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    });
+
+    // Fechar menu ao clicar em um link
     navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', () => {
+            navLinksContainer.classList.remove('active');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        });
+    });
+
+    // ------------------------------------
+    // 2. SCROLL ANIMATION (Fade In)
+    // ------------------------------------
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.15 // Elemento aparece quando 15% dele estiver visível
+    };
+
+    const scrollObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show-element');
+                observer.unobserve(entry.target); // Para de observar depois que animou
+            }
+        });
+    }, observerOptions);
+
+    const hiddenElements = document.querySelectorAll('.hidden-element');
+    hiddenElements.forEach((el) => scrollObserver.observe(el));
+
+    // ------------------------------------
+    // 3. SCROLL SUAVE & NAVBAR ATIVA (Mantido do original)
+    // ------------------------------------
+    const sections = document.querySelectorAll('section[id], header[id]');
+    
+    // Scroll suave para links internos
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const targetId = this.getAttribute('href');
             const targetSection = document.querySelector(targetId);
-
-            if (targetSection) {
-                // Adiciona um pequeno offset para que a barra de navegação fixa não cubra o título da seção
-                const headerOffset = 85; 
+            if(targetSection){
+                const headerOffset = 80;
                 const elementPosition = targetSection.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
+                
                 window.scrollTo({
                     top: offsetPosition,
-                    behavior: 'smooth'
+                    behavior: "smooth"
                 });
             }
         });
     });
 
-    // ------------------------------------
-    // 2. SCROLL SPY (Destaca o menu ativo)
-    // ------------------------------------
-    const options = {
-        // Define a margem superior para que o ponto de ativação esteja logo abaixo do menu fixo
-        rootMargin: '-100px 0px 0px 0px', 
-        threshold: 0.5 // 50% da seção visível
-    };
-
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // Remove a classe 'active' de todos os links
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                });
-
-                // Adiciona a classe 'active' ao link que corresponde ao ID da seção visível
-                const activeLink = document.querySelector(`.main-nav ul li a[href="#${entry.target.id}"]`);
-                if (activeLink) {
-                    activeLink.classList.add('active');
-                }
+    // Highlight menu ativo
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (pageYOffset >= (sectionTop - 150)) {
+                current = section.getAttribute('id');
             }
         });
-    }, options);
 
-    // Observa cada seção
-    sections.forEach(section => {
-        observer.observe(section);
+        navLinks.forEach(li => {
+            li.classList.remove('active');
+            if (li.getAttribute('href').includes(current)) {
+                li.classList.add('active');
+            }
+        });
     });
 });
